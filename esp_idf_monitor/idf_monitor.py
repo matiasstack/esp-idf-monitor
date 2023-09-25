@@ -97,7 +97,8 @@ class Monitor:
         timestamps=False,  # type: bool
         timestamp_format='',  # type: str
         force_color=False,  # type: bool
-        rom_elf_file=None,  # type: Optional[str]
+        rom_elf_file=None,  # type: Optional[str],
+        log_file=None
     ):
         self.event_queue = queue.Queue()  # type: queue.Queue
         self.cmd_queue = queue.Queue()  # type: queue.Queue
@@ -110,7 +111,7 @@ class Monitor:
         self.elf_file = elf_file or ''
         self.elf_exists = os.path.exists(self.elf_file)
         self.logger = Logger(self.elf_file, self.console, timestamps, timestamp_format, b'', enable_address_decoding,
-                             toolchain_prefix, rom_elf_file=rom_elf_file)
+                             toolchain_prefix, rom_elf_file=rom_elf_file, log_filename=log_file)
 
         self.coredump = CoreDump(decode_coredumps, self.event_queue, self.logger, websocket_client,
                                  self.elf_file) if self.elf_exists else None
@@ -404,7 +405,8 @@ def main() -> None:
                       args.timestamps,
                       args.timestamp_format,
                       args.force_color,
-                      rom_elf_file)
+                      rom_elf_file,
+                      args.log_file)
 
         yellow_print('--- Quit: {} | Menu: {} | Help: {} followed by {} ---'.format(
             key_description(monitor.console_parser.exit_key),

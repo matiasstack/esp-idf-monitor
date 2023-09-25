@@ -130,4 +130,10 @@ def get_parser():  # type: () -> argparse.ArgumentParser
         default=False,
         action='store_true')
 
+    parser.add_argument(
+        '--log-file',
+        help='File to store logs.',
+        type=lambda f: open(f, 'rb') if os.path.exists(f) else f'{f}',
+    )
+
     return parser

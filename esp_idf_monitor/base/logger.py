@@ -15,9 +15,10 @@ from .pc_address_matcher import PcAddressMatcher
 
 class Logger:
     def __init__(self, elf_file, console, timestamps, timestamp_format, pc_address_buffer, enable_address_decoding,
-                 toolchain_prefix, rom_elf_file=None):
+                 toolchain_prefix, rom_elf_file=None, log_filename=None):
         # type: (str, miniterm.Console, bool, str, bytes, bool, str, Optional[str]) -> None
         self.log_file = None  # type: Optional[BinaryIO]
+        self.log_filename = log_filename
         self._output_enabled = True  # type: bool
         self._start_of_line = True  # type: bool
         self.elf_file = elf_file
@@ -32,6 +33,9 @@ class Logger:
             self.pc_address_matcher = PcAddressMatcher(self.elf_file)
             if rom_elf_file is not None:
                 self.rom_pc_address_matcher = PcAddressMatcher(self.rom_elf_file)  # type: ignore
+
+        if self.log_filename:
+            self.start_logging()
 
     @property
     def pc_address_buffer(self):  # type: () -> bytes
@@ -68,8 +72,11 @@ class Logger:
 
     def start_logging(self):  # type: () -> None
         if not self._log_file:
-            name = 'log.{}.{}.txt'.format(os.path.splitext(os.path.basename(self.elf_file))[0],
-                                          datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
+            if self.log_filename:
+                name = '{}.{}.log'.format(self.log_filename, datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
+            else:
+                name = 'log.{}.{}.txt'.format(os.path.splitext(os.path.basename(self.elf_file))[0],
+                                              datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
             try:
                 self.log_file = open(name, 'wb+')
                 yellow_print('\nLogging is enabled into file {}'.format(name))
